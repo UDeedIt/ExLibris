@@ -39,7 +39,6 @@ dependencies:
   go_router: ^14.8.1
   drift: ^2.18.0
   drift_sqflite: ^2.0.0
-
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
 
