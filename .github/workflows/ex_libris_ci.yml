@@ -1,49 +1,44 @@
-name: Ex Libris CI
+name: Ex Libris CI  # Name of the GitHub Actions workflow
 
 on:
   push:
-    # Triggers the workflow on pushes to main and any feature branch
-    branches: [ main, feature/* ]
-
+    branches: [ main, feature/* ]  # Triggers the workflow on pushes to main and any feature branch
   pull_request:
-    # Triggers the workflow on pull requests to the main branch
-    branches: [ main ]
+    branches: [ main ]  # Triggers the workflow on pull requests to the main branch
 
 jobs:
   build:  # This defines the build job
 
-    # Runs the job on the latest version of Ubuntu
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runs the job on the latest version of Ubuntu
 
     steps:
       # Step to check out the repository code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Step to set up Java Development Kit version 11
+      # Step to set up JDK 11
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v3  # Use the latest setup-java action
         with:
           java-version: '11'  # Define the Java version to use
           distribution: 'temurin'  # Specify the distribution of Java
 
-      # Step to install Flutter
+      # Step to install a specific version of Flutter
       - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git -b stable
-          echo "::add-path::$(pwd)/flutter/bin"  # Add Flutter to the PATH
-          flutter channel stable  # Ensure we are on the stable channel
-          flutter upgrade  # Upgrade to the latest stable version
+          echo "::add-path::$(pwd)/flutter/bin"  # Add Flutter to PATH
+          flutter config --enable-web  # Enable web support (if needed)
+          flutter pub get  # Get dependencies before upgrading
+          flutter upgrade  # Running this makes sure Flutter is up to date
 
-      # Step to fetch application dependencies
+      # Step to get dependencies
       - name: Get dependencies
-        # Runs the command to get Flutter dependencies defined in pubspec.yaml
-        run: flutter pub get
+        run: flutter pub get  # Runs the command to get Flutter dependencies defined in pubspec.yaml
 
       # Step to analyze the Dart code for potential issues
       - name: Analyze code
-        # Runs Flutter analysis on the code base
-        run: flutter analyze
+        run: flutter analyze  # Runs Flutter analysis on the code base
 
       # Step to execute tests in the Flutter application
       - name: Run tests
