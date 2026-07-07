@@ -27,33 +27,42 @@ jobs:
       # - name: Grant execute permission for gradlew
       #   run: chmod +x gradlew  # Only needed if you have gradlew in your project
 
-      # Step to cache Flutter SDK
-      - name: Cache Flutter
-        uses: actions/cache@v4
-        with:
-          path: ~/.flutter
-          key: ${{ runner.os }}-flutter-sdk-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-sdk-
+      # ==================== FLUTTER INSTALLATION OPTIONS ====================
 
-      # Step to install Flutter
-      - name: Install Flutter
-        run: |
-          if [ ! -d "$HOME/.flutter" ]; then
-            git clone https://github.com/flutter/flutter.git -b stable "$HOME/.flutter"
-          fi
-          echo "$HOME/.flutter/bin" >> $GITHUB_PATH  # Add Flutter to PATH
+      # OPTION 1: Manual Flutter installation with caching (commented for portfolio/future use)
+      # - name: Cache Flutter
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.flutter
+      #     key: ${{ runner.os }}-flutter-sdk-${{ hashFiles('**/pubspec.yaml') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-flutter-sdk-
+      #
+      # - name: Install Flutter
+      #   run: |
+      #     if [ ! -d "$HOME/.flutter" ]; then
+      #       git clone https://github.com/flutter/flutter.git -b stable "$HOME/.flutter"
+      #     fi
+      #     echo "$HOME/.flutter/bin" >> $GITHUB_PATH  # Add Flutter to PATH
+
+      # OPTION 2: Using official Flutter action (ACTIVE - faster and more reliable)
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true  # Automatically caches Flutter SDK and pub dependencies
+
+      # =====================================================================
 
       # Step to ensure Flutter is usable
       - name: Run Flutter Doctor
-        run: |
-          flutter doctor  # Verify that Flutter is set up correctly
+        run: flutter doctor  # Verify that Flutter is set up correctly
 
       # Step to get dependencies
       - name: Get dependencies
         run: flutter pub get  # Runs to get Flutter dependencies defined in pubspec.yaml
 
-      # Generate code with build_runner
+      # Step to generate code with build_runner (for Drift, Freezed, etc.)
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
 
