@@ -27,15 +27,27 @@ jobs:
       # - name: Grant execute permission for gradlew
       #   run: chmod +x gradlew  # Only needed if you have gradlew in your project
 
+      # Step to cache Flutter SDK
+      - name: Cache Flutter
+        uses: actions/cache@v4
+        with:
+          path: ~/.flutter
+          key: ${{ runner.os }}-flutter-sdk-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-sdk-
+
       # Step to install Flutter
       - name: Install Flutter
         run: |
-          git clone https://github.com/flutter/flutter.git -b stable
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          if [ ! -d "$HOME/.flutter" ]; then
+            git clone https://github.com/flutter/flutter.git -b stable "$HOME/.flutter"
+          fi
+          echo "$HOME/.flutter/bin" >> $GITHUB_PATH  # Add Flutter to PATH
 
       # Step to ensure Flutter is usable
       - name: Run Flutter Doctor
-        run: flutter doctor  # Verify Flutter installation and environment
+        run: |
+          flutter doctor  # Verify that Flutter is set up correctly
 
       # Step to get dependencies
       - name: Get dependencies
