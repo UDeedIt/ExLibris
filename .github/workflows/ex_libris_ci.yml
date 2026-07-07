@@ -2,12 +2,12 @@ name: Ex Libris CI  # Name of the GitHub Actions workflow
 
 on:
   push:
-    branches: [ main, feature/* ]  # Triggers on pushes to main and any feature branches
+    branches: [ main, feature/* ]  # Triggers the workflow on pushes to main and any feature branch
   pull_request:
-    branches: [ main ]  # Triggers on pull requests to the main branch
+    branches: [ main ]  # Triggers the workflow on pull requests to the main branch
 
 jobs:
-  build:  # Defines the build job
+  build:  # This defines the build job
 
     runs-on: ubuntu-latest  # Runs the job on the latest version of Ubuntu
 
@@ -27,26 +27,27 @@ jobs:
       - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git -b stable
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH  # Use the new way of setting PATH
-          flutter pub get  # Run to get Flutter dependencies
+          # Set the Flutter path for the current session
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          flutter pub get  # Get the Flutter dependencies immediately after the path is set
 
       # Step to ensure Flutter is usable
-      - name: Flutter Doctor
-        run: flutter doctor  # This helps to verify Flutter installation and environment
+      - name: Run Flutter Doctor
+        run: flutter doctor  # Verify that Flutter is set up correctly
 
       # Step to get dependencies
       - name: Get dependencies
-        run: flutter pub get  # Fetch Flutter dependencies defined in pubspec.yaml
+        run: flutter pub get  # Runs the command to get Flutter dependencies defined in pubspec.yaml
 
       # Step to analyze the Dart code for potential issues
       - name: Analyze code
-        run: flutter analyze  # Run Flutter analysis on the code base
+        run: flutter analyze  # Runs Flutter analysis on the code base
 
       # Step to execute tests in the Flutter application
       - name: Run tests
-        run: flutter test  # Run the test suite
+        run: flutter test  # Runs the test suite
 
       # Optional step to build the APK for the Flutter app
-      # Uncomment to build the APK later
+      # Uncomment to build APK later
       # - name: Build APK (optional)
       #   run: flutter build apk --release  # Generates an APK file in release mode
