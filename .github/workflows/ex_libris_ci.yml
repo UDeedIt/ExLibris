@@ -27,6 +27,14 @@ jobs:
           java-version: '11'  # Define the Java version to use
           distribution: 'temurin'  # Specify the distribution of Java
 
+      # Step to install Flutter
+      - name: Install Flutter
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable
+          echo "::add-path::$(pwd)/flutter/bin"  # Add Flutter to the PATH
+          flutter channel stable  # Ensure we are on the stable channel
+          flutter upgrade  # Upgrade to the latest stable version
+
       # Step to fetch application dependencies
       - name: Get dependencies
         # Runs the command to get Flutter dependencies defined in pubspec.yaml
