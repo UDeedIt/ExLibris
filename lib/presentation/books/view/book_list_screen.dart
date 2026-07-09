@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
 import 'package:ex_libris/presentation/books/view/add_book_screen.dart';
+import 'package:ex_libris/presentation/books/view/edit_book_screen.dart';
 
 /// Screen that displays the list of books.
 ///
@@ -59,6 +60,7 @@ class BookListScreen extends ConsumerWidget {
       BookListState state,
   ) {
     if (state.isLoading && state.books.isEmpty) {
+
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
@@ -109,6 +111,16 @@ class BookListScreen extends ConsumerWidget {
         final book = state.books[index];
 
         return ListTile(
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => EditBookScreen(book: book),
+              ),
+            );
+            // After returning from edit, the ViewModel has already refreshed,
+            // but calling loadBooks protects against external changes.
+            await ref.read(bookListViewModelProvider.notifier).loadBooks();
+          },
           title: Text(book.title),
           subtitle: Text(
             book.authorName?.isNotEmpty == true
@@ -158,6 +170,7 @@ class BookListScreen extends ConsumerWidget {
             ],
           ),
         );
+
       },
     );
   }

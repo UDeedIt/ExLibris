@@ -1,27 +1,41 @@
-// lib/presentation/books/view/add_book_screen.dart
+// lib/presentation/books/view/edit_book_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/domain/entities/book.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
 
-/// Simple form screen for creating a new book entry.
-///
-/// This is intentionally minimal for the initial portfolio version.
-class AddBookScreen extends ConsumerStatefulWidget {
-  const AddBookScreen({super.key});
+/// Form screen for editing an existing book entry.
+class EditBookScreen extends ConsumerStatefulWidget {
+  const EditBookScreen({
+    super.key,
+    required this.book,
+  });
+
+  /// Book to be edited.
+  final Book book;
 
   @override
-  ConsumerState<AddBookScreen> createState() => _AddBookScreenState();
+  ConsumerState<EditBookScreen> createState() => _EditBookScreenState();
 }
 
-class _AddBookScreenState extends ConsumerState<AddBookScreen> {
+class _EditBookScreenState extends ConsumerState<EditBookScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _authorController = TextEditingController();
-  final _isbnController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _authorController;
+  late final TextEditingController _isbnController;
 
-  String _readingStatus = 'to_read';
+  late String _readingStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.book.title);
+    _authorController =
+        TextEditingController(text: widget.book.authorName ?? '');
+    _isbnController = TextEditingController(text: widget.book.isbn ?? '');
+    _readingStatus = widget.book.readingStatus;
+  }
 
   @override
   void dispose() {
@@ -35,7 +49,7 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Book'),
+        title: const Text('Edit Book'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -100,7 +114,7 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _onSubmit,
-                child: const Text('Save'),
+                child: const Text('Save changes'),
               ),
             ],
           ),
@@ -114,8 +128,8 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
 
     final notifier = ref.read(bookListViewModelProvider.notifier);
 
-    final newBook = Book(
-      id: 0, // Will be replaced by the repository/database.
+    final updatedBook = Book(
+      id: widget.book.id,
       title: _titleController.text.trim(),
       authorName: _authorController.text.trim().isEmpty
           ? null
@@ -124,10 +138,10 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
           ? null
           : _isbnController.text.trim(),
       readingStatus: _readingStatus,
-      categories: const [],
+      categories: widget.book.categories,
     );
 
-    await notifier.addBook(newBook);
+    await notifier.updateBook(updatedBook);
 
     if (mounted) {
       Navigator.of(context).pop();
