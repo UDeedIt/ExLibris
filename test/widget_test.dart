@@ -19,7 +19,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify that the main screen title is shown.
-        expect(find.text('My Library'), findsOneWidget);
+        expect(find.text('Ex Libris'), findsOneWidget);
 
         // Verify that the FloatingActionButton with the add icon is present.
         expect(find.byIcon(Icons.add), findsOneWidget);
