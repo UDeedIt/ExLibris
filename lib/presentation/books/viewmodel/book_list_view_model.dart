@@ -74,6 +74,43 @@ class BookListViewModel extends Notifier<BookListState> {
     }
   }
 
+  /// Creates a new book using the [BookRepository] and refreshes the list.
+  Future<void> addBook(Book book) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final repo = ref.read(bookRepositoryProvider);
+      await repo.addBook(book);
+      final books = await repo.getAllBooks();
+      state = state.copyWith(isLoading: false, books: books);
+
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// Deletes a book by its identifier and refreshes the list.
+  Future<void> deleteBook(int id) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final repo = ref.read(bookRepositoryProvider);
+      await repo.deleteBook(id);
+      final books = await repo.getAllBooks();
+      state = state.copyWith(isLoading: false, books: books);
+
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+
   /// Inserts sample books into the repository if no books exist yet.
   ///
   /// This is used to populate the local database with initial data for

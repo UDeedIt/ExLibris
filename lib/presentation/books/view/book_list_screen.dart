@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
+import 'package:ex_libris/presentation/books/view/add_book_screen.dart';
 
 /// Screen that displays the list of books.
 ///
@@ -16,15 +17,20 @@ class BookListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Library'),
+        title: const Text('Ex Libris'),
       ),
       body: _buildBody(context, ref, state),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Trigger a manual refresh of the book list.
-          ref.read(bookListViewModelProvider.notifier).loadBooks();
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const AddBookScreen(),
+            ),
+          );
+          // After returning from AddBookScreen, refresh the list.
+          await ref.read(bookListViewModelProvider.notifier).loadBooks();
         },
-        child: const Icon(Icons.refresh),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -34,49 +40,126 @@ class BookListScreen extends ConsumerWidget {
       WidgetRef ref,
       BookListState state,
       ) {
+    // Wrap all content in a single RefreshIndicator so pull-to-refresh
+    // is consistently available.
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(bookListViewModelProvider.notifier).loadBooks(),
+      child: _buildScrollableContent(context, ref, state),
+    );
+  }
+
+  /// Builds the scrollable content used inside [RefreshIndicator].
+  ///
+  /// [AlwaysScrollableScrollPhysics] ensures that the pull-to-refresh gesture
+  /// works even when the list is short or empty.
+  Widget _buildScrollableContent(
+      BuildContext context,
+      WidgetRef ref,
+      BookListState state,
+  ) {
     if (state.isLoading && state.books.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ],
+      );
     }
 
     if (state.errorMessage != null && state.books.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
             state.errorMessage!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.error,
             ),
             textAlign: TextAlign.center,
           ),
-        ),
+        ],
       );
     }
 
     if (state.books.isEmpty) {
-      return const Center(
-        child: Text('No books yet. Tap the refresh button to load data.'),
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: Text('No books yet. Pull down to load or tap + to add.'),
+            ),
+          ),
+        ],
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(bookListViewModelProvider.notifier).loadBooks(),
-      child: ListView.builder(
-        itemCount: state.books.length,
-        itemBuilder: (context, index) {
-          final book = state.books[index];
-          return ListTile(
-            title: Text(book.title),
-            subtitle: Text(
-              book.authorName?.isNotEmpty == true
-                  ? book.authorName!
-                  : 'Unknown author',
-            ),
-            trailing: Text(book.readingStatus),
-          );
-        },
-      ),
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: state.books.length,
+      itemBuilder: (context, index) {
+        final book = state.books[index];
+
+        return ListTile(
+          title: Text(book.title),
+          subtitle: Text(
+            book.authorName?.isNotEmpty == true
+                ? book.authorName!
+                : 'Unknown author',
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(book.readingStatus),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Delete',
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        title: const Text('Delete book'),
+                        content: Text(
+                          'Are you sure you want to delete "${book.title}"?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirmed == true) {
+                    await ref
+                        .read(bookListViewModelProvider.notifier)
+                        .deleteBook(book.id);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
+
 }
