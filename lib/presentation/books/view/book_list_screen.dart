@@ -9,11 +9,26 @@ import 'package:ex_libris/presentation/books/view/edit_book_screen.dart';
 /// Screen that displays the list of books.
 ///
 /// Uses [bookListViewModelProvider] to load and observe state.
-class BookListScreen extends ConsumerWidget {
+class BookListScreen extends ConsumerStatefulWidget {
   const BookListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BookListScreen> createState() => _BookListScreenState();
+}
+
+
+class _BookListScreenState extends ConsumerState<BookListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger initial load of books when the screen is first shown.
+    Future.microtask(
+          () => ref.read(bookListViewModelProvider.notifier).loadBooks(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(bookListViewModelProvider);
 
     return Scaffold(
@@ -36,13 +51,15 @@ class BookListScreen extends ConsumerWidget {
     );
   }
 
+  /// Builds the main body of the screen.
+  ///
+  /// Wraps all content in a [RefreshIndicator] so that pull-to-refresh
+  /// is consistently available.
   Widget _buildBody(
       BuildContext context,
       WidgetRef ref,
       BookListState state,
       ) {
-    // Wrap all content in a single RefreshIndicator so pull-to-refresh
-    // is consistently available.
     return RefreshIndicator(
       onRefresh: () =>
           ref.read(bookListViewModelProvider.notifier).loadBooks(),
@@ -58,9 +75,8 @@ class BookListScreen extends ConsumerWidget {
       BuildContext context,
       WidgetRef ref,
       BookListState state,
-  ) {
+      ) {
     if (state.isLoading && state.books.isEmpty) {
-
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
@@ -117,8 +133,7 @@ class BookListScreen extends ConsumerWidget {
                 builder: (_) => EditBookScreen(book: book),
               ),
             );
-            // After returning from edit, the ViewModel has already refreshed,
-            // but calling loadBooks protects against external changes.
+            // After returning from the edit screen, refresh the list.
             await ref.read(bookListViewModelProvider.notifier).loadBooks();
           },
           title: Text(book.title),
@@ -170,9 +185,7 @@ class BookListScreen extends ConsumerWidget {
             ],
           ),
         );
-
       },
     );
   }
-
 }
