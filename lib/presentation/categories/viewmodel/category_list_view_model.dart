@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/data/providers/data_providers.dart';
 import 'package:ex_libris/data/repositories/category_repository.dart';
 import 'package:ex_libris/domain/entities/category.dart';
+import 'package:ex_libris/domain/sample_data/sample_categories.dart';
+
 
 /// Immutable state for the category list screen.
 class CategoryListState {
@@ -56,7 +58,14 @@ class CategoryListViewModel extends Notifier<CategoryListState> {
 
     try {
       final repo = ref.read(categoryRepositoryProvider);
-      final categories = await repo.getAllCategories();
+      var categories = await repo.getAllCategories();
+
+      // If there are no categories yet, insert a few sample entries.
+      if (categories.isEmpty) {
+        await _ensureSampleCategoriesIfEmpty(repo);
+        categories = await repo.getAllCategories();
+      }
+
       state = state.copyWith(isLoading: false, categories: categories);
     } catch (e) {
       state = state.copyWith(
@@ -114,6 +123,19 @@ class CategoryListViewModel extends Notifier<CategoryListState> {
         isLoading: false,
         errorMessage: e.toString(),
       );
+    }
+  }
+
+  /// Inserts sample categories into the repository if no categories exist yet.
+  ///
+  /// This is used to populate the local database with initial data for
+  /// demonstration purposes when the app is started on a clean install.
+  Future<void> _ensureSampleCategoriesIfEmpty(CategoryRepository repo) async {
+    final existing = await repo.getAllCategories();
+    if (existing.isNotEmpty) return;
+
+    for (final category in kSampleCategories) {
+      await repo.addCategory(category);
     }
   }
 }
