@@ -1,16 +1,184 @@
-# ex_libris
+# Ex Libris
+Ex Libris is a personal library management application built with Flutter.
 
-A personal library managment flutter app
+It provides a structured way to manage books, authors, and categories, offering a normalized local database and complete create, read, update, and delete (CRUD) flows for each of them.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Features (current foundation)
 
-A few resources to get you started if this is your first Flutter project:
+- Books
+  - List all books
+  - Add / edit / delete books
+  - Reading status (to_read / reading / finished)
+  - Initial sample books seeded on first run
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Authors
+  - Normalized Authors table
+  - Books reference authors by authorId
+  - Authors are auto-created when adding books via the Book repository
+  - Dedicated author list
+  - Add / edit / delete authors
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Categories
+  - Categories table with name + description
+  - Initial sample categories seeded on first run
+  - Dedicated category list
+  - Add / edit / delete categories
+
+- Infrastructure / Tooling
+  - Local database with Drift (SQLite)
+  - State management with Riverpod (Notifiers + providers)
+  - Basic CI with GitHub Actions (analyze, test)
+  - Widget smoke test for app startup
+
+
+---
+
+## Architecture
+
+The app follows a layered, feature-oriented architecture with clear separation of concerns:
+
+lib/
+
+  core/                 # (future cross-cutting concerns: routing, theme, etc.) 
+    data/ 
+      local/              # Drift database and table definitions 
+      mappers/            # Drift row <-> domain entity mappers 
+      repositories/       # Repository interfaces + Drift implementations 
+      providers/          # Riverpod providers for AppDatabase and repositories
+
+  domain/ 
+    entities/           # Domain models (Book, Author, Category) 
+    sample_data/        # Sample data used to seed an empty database
+
+  presentation/ 
+    books/              # Book screens + viewmodels 
+    authors/            # Author screens + viewmodels 
+    categories/         # Category screens + viewmodels 
+
+
+### Layers
+
+- Data layer
+  - Drift database (AppDatabase) with tables:
+    - Books (with authorId, isbn, categories as JSON, readingStatus)
+    - Authors
+    - Categories
+  - Repositories:
+    - BookRepository / DriftBookRepository
+    - AuthorRepository / DriftAuthorRepository
+    - CategoryRepository / DriftCategoryRepository
+  - Mappers:
+    - BookMapper (joins Books + Authors, decodes categories JSON)
+    - AuthorMapper
+    - CategoryMapper
+  - Riverpod providers:
+    - appDatabaseProvider
+    - bookRepositoryProvider
+    - authorRepositoryProvider
+    - categoryRepositoryProvider
+
+- Domain layer
+  - Entities:
+    - Book
+    - Author
+    - Category
+  - Sample data:
+    - kSampleBooks
+    - kSampleCategories
+
+- Presentation layer
+  - ViewModels (Riverpod Notifiers):
+    - BookListViewModel / BookListState
+    - AuthorListViewModel / AuthorListState
+    - CategoryListViewModel / CategoryListState
+  - Screens:
+    - Books:
+      - BookListScreen
+      - AddBookScreen
+      - EditBookScreen
+    - Authors:
+      - AuthorListScreen
+      - AddAuthorScreen
+      - EditAuthorScreen
+    - Categories:
+      - CategoryListScreen
+      - AddCategoryScreen
+      - EditCategoryScreen
+
+
+---
+
+## Tech Stack
+
+- Flutter (3.x, macOS / iOS / Android / Web capable)
+- Dart (3.x)
+- Drift (SQLite ORM for Dart/Flutter)
+- Riverpod (state management and dependency injection)
+- GitHub Actions (CI: analyze, test)
+- IDE: Android Studio / IntelliJ / VS Code
+
+
+---
+
+## Running the App
+
+### Prerequisites
+
+- Flutter installed (flutter doctor passes)
+- For macOS desktop:
+  - flutter config --enable-macos-desktop
+
+### Commands
+
+bash 
+# Fetch dependencies 
+flutter pub get 
+ 
+# Generate Drift (and other) code 
+dart run build_runner build --delete-conflicting-outputs 
+ 
+# Run on macOS 
+flutter run -d macos 
+ 
+# Run tests |flutter test 
+
+
+
+---
+
+## Current Status and Roadmap
+
+### Completed in EXL-1 Project Foundation
+
+- Normalized local data model: Books ↔ Authors; Categories
+- CRUD flows and screens for:
+  - Books
+  - Authors
+  - Categories
+- Sample data seeding on first run (books + categories)
+- Basic widget test and CI workflow
+
+### Next: EXL-9 Add Splash Screen and Navigation
+
+- Splash screen with initial warm-up
+- Central navigation shell:
+  - Books tab
+  - Authors tab
+  - Categories tab
+
+### Future (Portfolio and Beyond)
+
+- Visual polish of list and detail screens
+- Simple Spring Boot (Kotlin) backend:
+  - Backup / restore library over HTTP
+- Public GitHub portfolio version
+- Private Bitbucket commercial version with extended features
+
+
+---
+
+## License
+
+TBD.
