@@ -2,7 +2,9 @@
 
 import 'package:drift/drift.dart' as drift show Value;
 import 'package:ex_libris/data/local/app_database.dart';
+import 'package:ex_libris/data/mappers/author_mapper.dart';
 import 'package:ex_libris/domain/entities/author.dart';
+
 
 
 /// Abstraction for accessing and modifying author data.
@@ -32,15 +34,7 @@ class DriftAuthorRepository implements AuthorRepository {
   @override
   Future<List<Author>> getAllAuthors() async {
     final rows = await _db.select(_db.authors).get();
-    return rows
-        .map(
-          (entry) => Author(
-        id: entry.id,
-        name: entry.name,
-        bio: entry.bio,
-      ),
-    )
-        .toList();
+    return rows.map(AuthorMapper.fromEntry).toList();
   }
 
   @override
@@ -61,12 +55,7 @@ class DriftAuthorRepository implements AuthorRepository {
 
   @override
   Future<void> updateAuthor(Author author) async {
-    final entry = AuthorEntry(
-      id: author.id,
-      name: author.name,
-      bio: author.bio,
-    );
-
+    final entry = AuthorMapper.toEntry(author);
     await _db.update(_db.authors).replace(entry);
   }
 
