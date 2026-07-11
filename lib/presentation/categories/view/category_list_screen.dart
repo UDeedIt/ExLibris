@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/presentation/categories/viewmodel/category_list_view_model.dart';
+import 'package:ex_libris/presentation/categories/view/add_category_screen.dart';
+import 'package:ex_libris/presentation/categories/view/edit_category_screen.dart';
 
 /// Screen that displays the list of categories.
 class CategoryListScreen extends ConsumerStatefulWidget {
@@ -31,13 +33,26 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
       appBar: AppBar(
         title: const Text('Categories'),
       ),
-      body: _buildBody(context, state),
-      // FAB will be added later for add/edit/delete.
+      body: _buildBody(context, ref, state),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const AddCategoryScreen(),
+            ),
+          );
+          await ref
+              .read(categoryListViewModelProvider.notifier)
+              .loadCategories();
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
+
   /// Builds the main body of the screen, handling loading, error and empty states.
-  Widget _buildBody(BuildContext context, CategoryListState state) {
+  Widget _buildBody(BuildContext context, WidgetRef ref, CategoryListState state,) {
     if (state.isLoading && state.categories.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -68,13 +83,59 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
       itemBuilder: (context, index) {
         final category = state.categories[index];
         return ListTile(
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => EditCategoryScreen(category: category),
+              ),
+            );
+            await ref
+                .read(categoryListViewModelProvider.notifier)
+                .loadCategories();
+          },
           title: Text(category.name),
           subtitle: category.description != null &&
               category.description!.trim().isNotEmpty
               ? Text(category.description!)
               : null,
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete',
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (dialogContext) {
+                  return AlertDialog(
+                    title: const Text('Delete category'),
+                    content: Text(
+                      'Are you sure you want to delete "${category.name}"?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(true),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirmed == true) {
+                await ref
+                    .read(categoryListViewModelProvider.notifier)
+                    .deleteCategory(category.id);
+              }
+            },
+          ),
         );
       },
     );
+
   }
 }
