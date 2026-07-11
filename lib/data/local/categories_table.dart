@@ -11,4 +11,7 @@ class Categories extends Table {
 
   /// The name of the category.
   TextColumn get name => text().withLength(min: 1, max: 255)(); // Name of the genre/category
+
+  /// Optional descriptive text for the category.
+  TextColumn get description => text().nullable()();
 }

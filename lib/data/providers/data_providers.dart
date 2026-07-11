@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/data/local/app_database.dart';
 import 'package:ex_libris/data/repositories/book_repository.dart';
 import 'package:ex_libris/data/repositories/author_repository.dart';
+import 'package:ex_libris/data/repositories/category_repository.dart';
 
 /// Provides a singleton [AppDatabase] instance for the whole application.
 ///
@@ -15,6 +16,7 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
+
 /// Provides the [BookRepository] used across the app.
 ///
 /// This implementation is currently backed by Drift via [AppDatabase].
@@ -23,10 +25,20 @@ final bookRepositoryProvider = Provider<BookRepository>((ref) {
   return DriftBookRepository(db);
 });
 
+
 /// Provides the [AuthorRepository] used across the app.
 ///
 /// This implementation is currently backed by Drift via [AppDatabase].
 final authorRepositoryProvider = Provider<AuthorRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return DriftAuthorRepository(db);
+});
+
+
+/// Provides the [CategoryRepository] used across the app.
+///
+/// This implementation is currently backed by Drift via [AppDatabase].
+final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return DriftCategoryRepository(db);
 });
