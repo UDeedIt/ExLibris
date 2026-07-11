@@ -1,6 +1,6 @@
 // lib/main.dart
 
-import 'package:ex_libris/presentation/categories/view/category_list_screen.dart';
+import 'package:ex_libris/presentation/books/view/book_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +23,7 @@ class ExLibrisApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-      home: const CategoryListScreen(), // BookListScreen(), // AuthorListScreen(),
+      home: const  BookListScreen(), // CategoryListScreen(), // BookListScreen(), // AuthorListScreen(),
     );
   }
 }
