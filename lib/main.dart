@@ -1,8 +1,8 @@
 // lib/main.dart
 
+import 'package:ex_libris/presentation/splash/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ex_libris/presentation/home/view/home_shell_screen.dart';
 
 void main() {
   runApp(
@@ -23,7 +23,7 @@ class ExLibrisApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-      home: const  HomeShellScreen(),
+      home: const  SplashScreen(),
     );
   }
 }
