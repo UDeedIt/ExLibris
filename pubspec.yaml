@@ -16,6 +16,10 @@ dependencies:
   # State management
   flutter_riverpod: ^2.5.1
 
+  # Add multiple languages to flutter app
+  flutter_localizations:
+    sdk: flutter
+
   # Routing
   go_router: ^14.2.0
 
@@ -53,3 +57,4 @@ dev_dependencies:
 flutter:
   # The following line ensures that the Material Icons font is
   uses-material-design: true
+  generate: true

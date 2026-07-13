@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
 import 'package:ex_libris/presentation/home/view/home_shell_screen.dart';
+import 'package:ex_libris/l10n/app_localizations.dart';
 
 /// Initial splash screen displayed when the app launches.
 ///
@@ -38,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     }
 
     // Optional small delay to keep the splash visible briefly.
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
 
     if (!mounted) return;
 
@@ -67,14 +68,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Ex Libris',
+              AppLocalizations.of(context)!.appTitle, //'Ex Libris',
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Your personal library',
+              AppLocalizations.of(context)!.splashSubtitle, // 'Your personal library',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
               ),
