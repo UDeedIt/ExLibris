@@ -1,8 +1,11 @@
 // lib/main.dart
 
-import 'package:ex_libris/presentation/books/view/book_list_screen.dart';
+import 'package:ex_libris/presentation/splash/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ex_libris/l10n/app_localizations.dart';
+
 
 void main() {
   runApp(
@@ -18,12 +21,20 @@ class ExLibrisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ex Libris',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-      home: const  BookListScreen(), // CategoryListScreen(), // BookListScreen(), // AuthorListScreen(),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const SplashScreen(),
     );
+
   }
 }

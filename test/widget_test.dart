@@ -1,16 +1,13 @@
 // test/widget_test.dart
 
 import 'package:ex_libris/main.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   testWidgets(
-    'ExLibrisApp shows book list screen with add button',
+    'ExLibrisApp builds and shows splash title',
         (WidgetTester tester) async {
-
       // Build the app wrapped in ProviderScope (as in main()).
       await tester.pumpWidget(
         const ProviderScope(
@@ -18,14 +15,11 @@ void main() {
         ),
       );
 
-      // Pump a single frame to trigger the first build.
+      // Initial pump builds the splash screen.
       await tester.pump();
 
-      // Verify that the main screen title is shown.
-      expect(find.text('Ex Libris'), findsOneWidget);
-
-      // Verify that the FloatingActionButton with the add icon is present.
-      expect(find.byIcon(Icons.add), findsOneWidget);
+      // Verify that the splash displays the app title.
+      expect(find.text('Ex Libris'), findsWidgets);
     },
   );
 }

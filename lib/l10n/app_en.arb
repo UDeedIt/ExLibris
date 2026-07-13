@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "appTitle": "Ex Libris",
+  "splashSubtitle": "Your personal library",
+  "navBooks": "Books",
+  "navAuthors": "Authors",
+  "navCategories": "Categories"
+}
