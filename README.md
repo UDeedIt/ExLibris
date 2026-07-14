@@ -3,9 +3,10 @@ Ex Libris is a personal library management application built with Flutter.
 
 It provides a structured way to manage books, authors, and categories, offering a normalized local database and complete create, read, update, and delete (CRUD) flows for each of them.
 
+
 ---
 
-## Features (current foundation)
+## Features
 
 - Books
   - List all books
@@ -29,6 +30,7 @@ It provides a structured way to manage books, authors, and categories, offering 
 - Infrastructure / Tooling
   - Local database with Drift (SQLite)
   - State management with Riverpod (Notifiers + providers)
+  - ARB-based localization (gen-l10n, currently en / de)
   - Basic CI with GitHub Actions (analyze, test)
   - Widget smoke test for app startup
 
@@ -38,25 +40,26 @@ It provides a structured way to manage books, authors, and categories, offering 
 ## Architecture
 
 The app follows a layered, feature-oriented architecture with clear separation of concerns:
+ 
+lib/   
+  core/                 # (future cross-cutting concerns: routing, theme, etc.)   
+    data/   
+    local/              # Drift database and table definitions   
+    mappers/            # Drift row <-> domain entity mappers   
+    repositories/       # Repository interfaces + Drift implementations   
+    providers/          # Riverpod providers for AppDatabase and repositories   
 
-lib/
-
-  core/                 # (future cross-cutting concerns: routing, theme, etc.) 
-    data/ 
-      local/              # Drift database and table definitions 
-      mappers/            # Drift row <-> domain entity mappers 
-      repositories/       # Repository interfaces + Drift implementations 
-      providers/          # Riverpod providers for AppDatabase and repositories
-
-  domain/ 
-    entities/           # Domain models (Book, Author, Category) 
-    sample_data/        # Sample data used to seed an empty database
-
-  presentation/ 
-    books/              # Book screens + viewmodels 
-    authors/            # Author screens + viewmodels 
-    categories/         # Category screens + viewmodels 
-
+  domain/   
+    entities/           # Domain models (Book, Author, Category)   
+    sample_data/        # Sample data used to seed an empty database   
+  
+  presentation/
+    books/              # Book screens + viewmodels   
+    authors/            # Author screens + viewmodels   
+    categories/         # Category screens + viewmodels   
+    home/               # Navigation shell   
+    splash/             # Splash screen   
+  
 
 ### Layers
 
@@ -106,6 +109,9 @@ lib/
       - CategoryListScreen
       - AddCategoryScreen
       - EditCategoryScreen
+    - Navigation & splash:
+      - HomeShellScreen (bottom navigation)
+      - SplashScreen
 
 
 ---
@@ -116,6 +122,7 @@ lib/
 - Dart (3.x)
 - Drift (SQLite ORM for Dart/Flutter)
 - Riverpod (state management and dependency injection)
+- Flutter localization (ARB + gen-l10n)
 - GitHub Actions (CI: analyze, test)
 - IDE: Android Studio / IntelliJ / VS Code
 
@@ -133,6 +140,7 @@ lib/
 ### Commands
 
 bash 
+
 # Fetch dependencies 
 flutter pub get 
  
@@ -142,15 +150,42 @@ dart run build_runner build --delete-conflicting-outputs
 # Run on macOS 
 flutter run -d macos 
  
-# Run tests |flutter test 
+# Run tests 
+flutter test 
 
+
+
+---
+
+## Screenshots
+
+> Note: file paths below assume screenshots are stored under assets/screenshots/.
+> You can adjust names/paths to match your actual files.
+
+### macOS (desktop)
+
+| Splash | Books |
+|--------|-------|
+| macOS Splash | macOS Books |
+
+### Android
+
+| Splash | Books |
+|--------|-------|
+| Android Splash | Android Books |
+
+### iOS
+
+| Splash | Books |
+|--------|-------|
+| iOS Splash | iOS Books |
 
 
 ---
 
 ## Current Status and Roadmap
 
-### Completed in EXL-1 Project Foundation
+### Completed
 
 - Normalized local data model: Books ↔ Authors; Categories
 - CRUD flows and screens for:
@@ -158,23 +193,19 @@ flutter run -d macos
   - Authors
   - Categories
 - Sample data seeding on first run (books + categories)
-- Basic widget test and CI workflow
-
-### Next: EXL-9 Add Splash Screen and Navigation
-
 - Splash screen with initial warm-up
-- Central navigation shell:
-  - Books tab
-  - Authors tab
-  - Categories tab
+- Navigation shell with tabs for:
+  - Books
+  - Authors
+  - Categories
+- Basic widget test and CI workflow
+- Basic localization (en/de) for splash and navigation labels
 
-### Future (Portfolio and Beyond)
+### Future
 
-- Visual polish of list and detail screens
-- Simple Spring Boot (Kotlin) backend:
-  - Backup / restore library over HTTP
-- Public GitHub portfolio version
-- Private Bitbucket commercial version with extended features
+- Visual polish of additional screens and dialogs
+- Simple backend service for backup/restore of the library over HTTP
+- Extended features in a private/commercial version
 
 
 ---
