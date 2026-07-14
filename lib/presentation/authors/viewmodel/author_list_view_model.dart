@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/data/providers/data_providers.dart';
 import 'package:ex_libris/data/repositories/author_repository.dart';
 import 'package:ex_libris/domain/entities/author.dart';
+import 'package:ex_libris/domain/sample_data/sample_authors.dart';
 
 /// Immutable state for the author list screen.
 class AuthorListState {
@@ -56,9 +57,15 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
 
     try {
       final repo = ref.read(authorRepositoryProvider);
-      final authors = await repo.getAllAuthors();
-      state = state.copyWith(isLoading: false, authors: authors);
+      var authors = await repo.getAllAuthors();
 
+      // If there are no authors yet, insert a few sample entries.
+      if (authors.isEmpty) {
+        await _ensureSampleAuthorsIfEmpty(repo);
+        authors = await repo.getAllAuthors();
+      }
+
+      state = state.copyWith(isLoading: false, authors: authors);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -66,6 +73,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       );
     }
   }
+
 
   /// Creates a new author and refreshes the list.
   Future<void> addAuthor(Author author) async {
@@ -118,6 +126,19 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
         isLoading: false,
         errorMessage: e.toString(),
       );
+    }
+  }
+
+  /// Inserts sample authors into the repository if no authors exist yet.
+  ///
+  /// This is used to populate the local database with initial data for
+  /// demonstration purposes when the app is started on a clean install.
+  Future<void> _ensureSampleAuthorsIfEmpty(AuthorRepository repo) async {
+    final existing = await repo.getAllAuthors();
+    if (existing.isNotEmpty) return;
+
+    for (final author in kSampleAuthors) {
+      await repo.addAuthor(author);
     }
   }
 }
