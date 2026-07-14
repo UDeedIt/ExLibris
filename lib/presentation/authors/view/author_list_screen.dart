@@ -84,60 +84,104 @@ class _AuthorListScreenState extends ConsumerState<AuthorListScreen> {
     return ListView.builder(
       itemCount: state.authors.length,
       itemBuilder: (context, index) {
-        // Author for this row.
         final author = state.authors[index];
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
 
-        return ListTile(
-          onTap: () async {
-            // Open the edit screen for this author.
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => EditAuthorScreen(author: author),
-              ),
-            );
-            // Refresh the list after editing.
-            await ref
-                .read(authorListViewModelProvider.notifier)
-                .loadAuthors();
-          },
-          title: Text(author.name),
-          subtitle: author.bio != null && author.bio!.trim().isNotEmpty
-              ? Text(author.bio!)
-              : null,
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Delete',
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    title: const Text('Delete author'),
-                    content: Text(
-                      'Are you sure you want to delete "${author.name}"?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(true),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  );
-                },
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => EditAuthorScreen(author: author),
+                ),
               );
-
-              if (confirmed == true) {
-                await ref
-                    .read(authorListViewModelProvider.notifier)
-                    .deleteAuthor(author.id);
-              }
+              await ref
+                  .read(authorListViewModelProvider.notifier)
+                  .loadAuthors();
             },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  // Leading icon for author.
+                  Icon(
+                    Icons.person,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  // Main text column (name + optional bio).
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          author.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (author.bio != null &&
+                            author.bio!.trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            author.bio!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color:
+                              theme.textTheme.bodySmall?.color?.withValues(
+                                alpha: 0.7,
+                              ),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: 'Delete',
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Delete author'),
+                            content: Text(
+                              'Are you sure you want to delete "${author.name}"?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(true),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (confirmed == true) {
+                        await ref
+                            .read(authorListViewModelProvider.notifier)
+                            .deleteAuthor(author.id);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },

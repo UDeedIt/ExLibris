@@ -125,67 +125,149 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
       itemCount: state.books.length,
       itemBuilder: (context, index) {
         final book = state.books[index];
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
 
-        return ListTile(
-          onTap: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => EditBookScreen(book: book),
-              ),
-            );
-            // After returning from the edit screen, refresh the list.
-            await ref.read(bookListViewModelProvider.notifier).loadBooks();
-          },
-          title: Text(book.title),
-          subtitle: Text(
-            book.authorName?.isNotEmpty == true
-                ? book.authorName!
-                : 'Unknown author',
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(book.readingStatus),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: 'Delete',
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (dialogContext) {
-                      return AlertDialog(
-                        title: const Text('Delete book'),
-                        content: Text(
-                          'Are you sure you want to delete "${book.title}"?',
+        // Pick a color for the reading status chip.
+        final Color statusColor;
+        switch (book.readingStatus) {
+          case 'reading':
+            statusColor = colorScheme.tertiary;
+            break;
+          case 'finished':
+            statusColor = colorScheme.secondary;
+            break;
+          case 'to_read':
+          default:
+            statusColor = colorScheme.primary;
+            break;
+        }
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => EditBookScreen(book: book),
+                ),
+              );
+              await ref
+                  .read(bookListViewModelProvider.notifier)
+                  .loadBooks();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  // Main text column (title + author).
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.of(dialogContext).pop(false),
-                            child: const Text('Cancel'),
+                        const SizedBox(height: 4),
+                        Text(
+                          book.authorName?.isNotEmpty == true
+                              ? book.authorName!
+                              : 'Unknown author',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.textTheme.bodySmall?.color
+                                ?.withValues(alpha: 0.7),
                           ),
-                          FilledButton(
-                            onPressed: () =>
-                                Navigator.of(dialogContext).pop(true),
-                            child: const Text('Delete'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Status chip + delete button.
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Chip(
+                        label: Text(
+                          _readingStatusLabel(book.readingStatus),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onPrimary,
                           ),
-                        ],
-                      );
-                    },
-                  );
+                        ),
+                        backgroundColor: statusColor,
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        tooltip: 'Delete',
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) {
+                              return AlertDialog(
+                                title: const Text('Delete book'),
+                                content: Text(
+                                  'Are you sure you want to delete "${book.title}"?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(true),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
 
-                  if (confirmed == true) {
-                    await ref
-                        .read(bookListViewModelProvider.notifier)
-                        .deleteBook(book.id);
-                  }
-                },
+                          if (confirmed == true) {
+                            await ref
+                                .read(bookListViewModelProvider.notifier)
+                                .deleteBook(book.id);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
+
+  /// Returns a human-readable label for a reading status code.
+  String _readingStatusLabel(String status) {
+    switch (status) {
+      case 'to_read':
+        return 'To read';
+
+      case 'reading':
+        return 'Reading';
+
+      case 'finished':
+        return 'Finished';
+
+      default:
+        return status;
+    }
+  }
+
 }
