@@ -84,60 +84,104 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
       itemCount: state.categories.length,
       itemBuilder: (context, index) {
         final category = state.categories[index];
-        return ListTile(
-          onTap: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => EditCategoryScreen(category: category),
-              ),
-            );
-            await ref
-                .read(categoryListViewModelProvider.notifier)
-                .loadCategories();
-          },
-          title: Text(category.name),
-          subtitle: category.description != null &&
-              category.description!.trim().isNotEmpty
-              ? Text(category.description!)
-              : null,
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Delete',
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    title: const Text('Delete category'),
-                    content: Text(
-                      'Are you sure you want to delete "${category.name}"?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(true),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  );
-                },
-              );
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
 
-              if (confirmed == true) {
-                await ref
-                    .read(categoryListViewModelProvider.notifier)
-                    .deleteCategory(category.id);
-              }
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => EditCategoryScreen(category: category),
+                ),
+              );
+              await ref
+                  .read(categoryListViewModelProvider.notifier)
+                  .loadCategories();
             },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.label_outline,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (category.description != null &&
+                            category.description!.trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            category.description!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color:
+                              theme.textTheme.bodySmall?.color?.withValues(
+                                alpha: 0.7,
+                              ),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: 'Delete',
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Delete category'),
+                            content: Text(
+                              'Are you sure you want to delete "${category.name}"?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(true),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (confirmed == true) {
+                        await ref
+                            .read(categoryListViewModelProvider.notifier)
+                            .deleteCategory(category.id);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
-
   }
 }
