@@ -15,7 +15,9 @@ class CategoryListScreen extends ConsumerStatefulWidget {
       _CategoryListScreenState();
 }
 
+
 class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
+
   @override
   void initState() {
     super.initState();

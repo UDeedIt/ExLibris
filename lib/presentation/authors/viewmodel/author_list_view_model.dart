@@ -43,8 +43,10 @@ class AuthorListState {
   }
 }
 
+
 /// ViewModel responsible for loading and modifying the list of authors.
 class AuthorListViewModel extends Notifier<AuthorListState> {
+
   @override
   AuthorListState build() => AuthorListState.initial();
 
@@ -56,6 +58,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       final repo = ref.read(authorRepositoryProvider);
       final authors = await repo.getAllAuthors();
       state = state.copyWith(isLoading: false, authors: authors);
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -73,6 +76,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       await repo.addAuthor(author);
       final authors = await repo.getAllAuthors();
       state = state.copyWith(isLoading: false, authors: authors);
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -90,6 +94,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       await repo.updateAuthor(author);
       final authors = await repo.getAllAuthors();
       state = state.copyWith(isLoading: false, authors: authors);
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -107,6 +112,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       await repo.deleteAuthor(id);
       final authors = await repo.getAllAuthors();
       state = state.copyWith(isLoading: false, authors: authors);
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

@@ -34,6 +34,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Basic warm-up: trigger initial book load so seeding runs if needed.
     try {
       await ref.read(bookListViewModelProvider.notifier).loadBooks();
+
     } catch (_) {
       // Errors during warm-up are ignored for the splash.
     }
