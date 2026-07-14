@@ -141,17 +141,23 @@ lib/
 
 bash 
 
-# Fetch dependencies 
-flutter pub get 
- 
-# Generate Drift (and other) code 
-dart run build_runner build --delete-conflicting-outputs 
- 
-# Run on macOS 
-flutter run -d macos 
- 
-# Run tests 
-flutter test 
+# Fetch dependencies
+flutter pub get
+
+# Generate Drift (and other) code
+dart run build_runner build --delete-conflicting-outputs
+
+# Run on macOS
+flutter run -d macos
+
+# Run on Android (device or emulator)
+flutter run -d <android-device-id>
+
+# Run on iOS Simulator
+flutter run -d <ios-simulator-id>
+
+# Run tests
+flutter test
 
 
 
