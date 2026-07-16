@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/domain/entities/book.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
 
+import '../../../data/providers/data_providers.dart';
+import 'author_picker_dialog.dart';
+import 'category_picker_dialog.dart';
+
 /// Form screen for editing an existing book entry.
 class EditBookScreen extends ConsumerStatefulWidget {
   const EditBookScreen({
@@ -24,8 +28,11 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _authorController;
   late final TextEditingController _isbnController;
+  final _categoriesController = TextEditingController();
 
+  List<String> _selectedCategoryNames = [];
   late String _readingStatus;
+
 
   @override
   void initState() {
@@ -35,6 +42,8 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
         TextEditingController(text: widget.book.authorName ?? '');
     _isbnController = TextEditingController(text: widget.book.isbn ?? '');
     _readingStatus = widget.book.readingStatus;
+    _selectedCategoryNames = List<String>.from(widget.book.categories);
+    _categoriesController.text = _selectedCategoryNames.join(', ');
   }
 
   @override
@@ -42,8 +51,10 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
     _titleController.dispose();
     _authorController.dispose();
     _isbnController.dispose();
+    _categoriesController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +81,20 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
                 },
               ),
               const SizedBox(height: 12),
+
               TextFormField(
                 controller: _authorController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Author (optional)',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.list),
+                    tooltip: 'Pick existing author',
+                    onPressed: _onPickExistingAuthorPressed,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
+
               TextFormField(
                 controller: _isbnController,
                 decoration: const InputDecoration(
@@ -84,6 +102,23 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _categoriesController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Categories (optional)',
+                  hintText: 'Tap to pick categories',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.list),
+                    tooltip: 'Pick existing categories',
+                    onPressed: _onPickExistingCategoriesPressed,
+                  ),
+                ),
+                onTap: _onPickExistingCategoriesPressed,
+              ),
+              const SizedBox(height: 12),
+
               DropdownButtonFormField<String>(
                 initialValue: _readingStatus,
                 decoration: const InputDecoration(
@@ -112,6 +147,7 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
                 },
               ),
               const SizedBox(height: 24),
+
               FilledButton(
                 onPressed: _onSubmit,
                 child: const Text('Save changes'),
@@ -121,6 +157,40 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
         ),
       ),
     );
+  }
+
+
+  Future<void> _onPickExistingAuthorPressed() async {
+    final repo = ref.read(authorRepositoryProvider);
+
+    final selected = await showAuthorPickerDialog(
+      context: context,
+      authorRepository: repo,
+    );
+
+    if (selected != null && mounted) {
+      setState(() {
+        _authorController.text = selected.name;
+      });
+    }
+  }
+
+  /// Opens a dialog to pick one or more existing categories from the database.
+  Future<void> _onPickExistingCategoriesPressed() async {
+    final repo = ref.read(categoryRepositoryProvider);
+
+    final selected = await showCategoryMultiPickerDialog(
+      context: context,
+      categoryRepository: repo,
+      initiallySelectedNames: _selectedCategoryNames,
+    );
+
+    if (selected.isNotEmpty && mounted) {
+      setState(() {
+        _selectedCategoryNames = selected.map((c) => c.name).toList();
+        _categoriesController.text = _selectedCategoryNames.join(', ');
+      });
+    }
   }
 
   Future<void> _onSubmit() async {
@@ -138,7 +208,7 @@ class _EditBookScreenState extends ConsumerState<EditBookScreen> {
           ? null
           : _isbnController.text.trim(),
       readingStatus: _readingStatus,
-      categories: widget.book.categories,
+      categories: _selectedCategoryNames, //widget.book.categories,
     );
 
     await notifier.updateBook(updatedBook);

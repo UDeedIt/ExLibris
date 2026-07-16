@@ -20,6 +20,7 @@ class ExLibrisApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       theme: ThemeData(
@@ -33,6 +34,17 @@ class ExLibrisApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (locale != null) {
+          for (final supported in supportedLocales) {
+            if (supported.languageCode == locale.languageCode) {
+              return supported;
+            }
+          }
+        }
+        // Fallback when device language is not supported (e.g. ru):
+        return const Locale('en');
+      },
       home: const SplashScreen(),
     );
 

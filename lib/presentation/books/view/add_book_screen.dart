@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ex_libris/domain/entities/book.dart';
 import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart';
 
+import '../../../data/providers/data_providers.dart';
+import 'author_picker_dialog.dart';
+import 'category_picker_dialog.dart';
+
 /// Simple form screen for creating a new book entry.
 ///
 /// This is intentionally minimal for the initial portfolio version.
@@ -15,19 +19,25 @@ class AddBookScreen extends ConsumerStatefulWidget {
   ConsumerState<AddBookScreen> createState() => _AddBookScreenState();
 }
 
+
 class _AddBookScreenState extends ConsumerState<AddBookScreen> {
+
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _authorController = TextEditingController();
   final _isbnController = TextEditingController();
+  final _categoriesController = TextEditingController();
 
+  List<String> _selectedCategoryNames = [];
   String _readingStatus = 'to_read';
+
 
   @override
   void dispose() {
     _titleController.dispose();
     _authorController.dispose();
     _isbnController.dispose();
+    _categoriesController.dispose();
     super.dispose();
   }
 
@@ -56,13 +66,20 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
                 },
               ),
               const SizedBox(height: 12),
+
               TextFormField(
                 controller: _authorController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Author (optional)',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.list),
+                    tooltip: 'Pick existing author',
+                    onPressed: _onPickExistingAuthorPressed,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
+
               TextFormField(
                 controller: _isbnController,
                 decoration: const InputDecoration(
@@ -70,6 +87,23 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _categoriesController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Categories (optional)',
+                  hintText: 'Tap to pick categories',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.list),
+                    tooltip: 'Pick existing categories',
+                    onPressed: _onPickExistingCategoriesPressed,
+                  ),
+                ),
+                onTap: _onPickExistingCategoriesPressed,
+              ),
+              const SizedBox(height: 12),
+
               DropdownButtonFormField<String>(
                 initialValue: _readingStatus,
                 decoration: const InputDecoration(
@@ -98,6 +132,7 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
                 },
               ),
               const SizedBox(height: 24),
+
               FilledButton(
                 onPressed: _onSubmit,
                 child: const Text('Save'),
@@ -109,13 +144,47 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
     );
   }
 
+  /// Opens a dialog to pick an existing author from the database.
+  Future<void> _onPickExistingAuthorPressed() async {
+    final repo = ref.read(authorRepositoryProvider);
+
+    final selected = await showAuthorPickerDialog(
+      context: context,
+      authorRepository: repo,
+    );
+
+    if (selected != null && mounted) {
+      setState(() {
+        _authorController.text = selected.name;
+      });
+    }
+  }
+
+  /// Opens a dialog to pick one or more existing categories from the database.
+  Future<void> _onPickExistingCategoriesPressed() async {
+    final repo = ref.read(categoryRepositoryProvider);
+
+    final selected = await showCategoryMultiPickerDialog(
+      context: context,
+      categoryRepository: repo,
+      initiallySelectedNames: _selectedCategoryNames,
+    );
+
+    if (selected.isNotEmpty && mounted) {
+      setState(() {
+        _selectedCategoryNames = selected.map((c) => c.name).toList();
+        _categoriesController.text = _selectedCategoryNames.join(', ');
+      });
+    }
+  }
+
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
     final notifier = ref.read(bookListViewModelProvider.notifier);
 
     final newBook = Book(
-      id: 0, // Will be replaced by the repository/database.
+      id: 0,
       title: _titleController.text.trim(),
       authorName: _authorController.text.trim().isEmpty
           ? null
@@ -124,7 +193,7 @@ class _AddBookScreenState extends ConsumerState<AddBookScreen> {
           ? null
           : _isbnController.text.trim(),
       readingStatus: _readingStatus,
-      categories: const [],
+      categories: _selectedCategoryNames,
     );
 
     await notifier.addBook(newBook);
