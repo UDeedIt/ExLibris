@@ -8,26 +8,29 @@ It provides a structured way to manage books, authors, and categories, offering 
 
 ## Features
 
-- Books
+- **Books**
   - List all books
   - Add / edit / delete books
-  - Reading status (to_read / reading / finished)
+  - Reading status (`to_read` / `reading` / `finished`)
+  - Pick existing authors from a list when adding/editing a book
+  - Pick existing categories from a list when adding/editing a book
   - Initial sample books seeded on first run
 
-- Authors
+- **Authors**
   - Normalized Authors table
   - Books reference authors by authorId
   - Authors are auto-created when adding books via the Book repository
   - Dedicated author list
   - Add / edit / delete authors
 
-- Categories
-  - Categories table with name + description
+- **Categories**
+  - `Categories` table with name + description
   - Initial sample categories seeded on first run
   - Dedicated category list
   - Add / edit / delete categories
 
-- Infrastructure / Tooling
+
+- **Infrastructure / Tooling**
   - Local database with Drift (SQLite)
   - State management with Riverpod (Notifiers + providers)
   - ARB-based localization (gen-l10n, currently en / de)
@@ -126,6 +129,8 @@ lib/
 - GitHub Actions (CI: analyze, test)
 - IDE: Android Studio / IntelliJ / VS Code
 
+> The app runs on macOS desktop, Android devices/emulators, and iOS simulators/devices.
+
 
 ---
 
@@ -209,9 +214,7 @@ flutter test
 
 ### Future
 
-- Visual polish of additional screens and dialogs
 - Simple backend service for backup/restore of the library over HTTP
-- Extended features in a private/commercial version
 
 
 ---
