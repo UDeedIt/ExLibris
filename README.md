@@ -43,7 +43,8 @@ It provides a structured way to manage books, authors, and categories, offering 
 ## Architecture
 
 The app follows a layered, feature-oriented architecture with clear separation of concerns:
- 
+
+```text 
 lib/   
   core/                 # (future cross-cutting concerns: routing, theme, etc.)   
     data/   
@@ -62,10 +63,11 @@ lib/
     categories/         # Category screens + viewmodels   
     home/               # Navigation shell   
     splash/             # Splash screen   
-  
+```
 
 ### Layers
 
+```text
 - Data layer
   - Drift database (AppDatabase) with tables:
     - Books (with authorId, isbn, categories as JSON, readingStatus)
@@ -115,7 +117,7 @@ lib/
     - Navigation & splash:
       - HomeShellScreen (bottom navigation)
       - SplashScreen
-
+```
 
 ---
 
@@ -131,7 +133,6 @@ lib/
 
 > The app runs on macOS desktop, Android devices/emulators, and iOS simulators/devices.
 
-
 ---
 
 ## Running the App
@@ -142,29 +143,40 @@ lib/
 - For macOS desktop:
   - flutter config --enable-macos-desktop
 
+
 ### Commands
 
 bash 
 
 # Fetch dependencies
+```bash 
 flutter pub get
+```
 
 # Generate Drift (and other) code
+```bash 
 dart run build_runner build --delete-conflicting-outputs
+```
 
 # Run on macOS
+```bash 
 flutter run -d macos
+```
 
 # Run on Android (device or emulator)
+```bash 
 flutter run -d <android-device-id>
+```
 
 # Run on iOS Simulator
+```bash 
 flutter run -d <ios-simulator-id>
+```
 
 # Run tests
+```bash 
 flutter test
-
-
+```
 
 ---
 
@@ -215,7 +227,6 @@ flutter test
 ### Future
 
 - Simple backend service for backup/restore of the library over HTTP
-
 
 ---
 
