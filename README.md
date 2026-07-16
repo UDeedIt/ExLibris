@@ -43,7 +43,8 @@ It provides a structured way to manage books, authors, and categories, offering 
 ## Architecture
 
 The app follows a layered, feature-oriented architecture with clear separation of concerns:
- 
+
+```text 
 lib/   
   core/                 # (future cross-cutting concerns: routing, theme, etc.)   
     data/   
@@ -62,7 +63,7 @@ lib/
     categories/         # Category screens + viewmodels   
     home/               # Navigation shell   
     splash/             # Splash screen   
-  
+```
 
 ### Layers
 
@@ -116,7 +117,6 @@ lib/
       - HomeShellScreen (bottom navigation)
       - SplashScreen
 
-
 ---
 
 ## Tech Stack
@@ -131,7 +131,6 @@ lib/
 
 > The app runs on macOS desktop, Android devices/emulators, and iOS simulators/devices.
 
-
 ---
 
 ## Running the App
@@ -142,10 +141,10 @@ lib/
 - For macOS desktop:
   - flutter config --enable-macos-desktop
 
+
 ### Commands
 
-bash 
-
+```bash 
 # Fetch dependencies
 flutter pub get
 
@@ -163,8 +162,7 @@ flutter run -d <ios-simulator-id>
 
 # Run tests
 flutter test
-
-
+```
 
 ---
 
@@ -215,7 +213,6 @@ flutter test
 ### Future
 
 - Simple backend service for backup/restore of the library over HTTP
-
 
 ---
 
