@@ -57,15 +57,15 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
 
     try {
       final repo = ref.read(authorRepositoryProvider);
-      var authors = await repo.getAllAuthors();
 
-      // If there are no authors yet, insert a few sample entries.
-      if (authors.isEmpty) {
-        await _ensureSampleAuthorsIfEmpty(repo);
-        authors = await repo.getAllAuthors();
-      }
+      // Ensure sample authors and bios are present / enriched.
+      await _ensureSampleAuthorsIfEmpty(repo);
+
+      // Load the updated list of authors.
+      final authors = await repo.getAllAuthors();
 
       state = state.copyWith(isLoading: false, authors: authors);
+
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -73,6 +73,7 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
       );
     }
   }
+
 
 
   /// Creates a new author and refreshes the list.
@@ -129,16 +130,37 @@ class AuthorListViewModel extends Notifier<AuthorListState> {
     }
   }
 
-  /// Inserts sample authors into the repository if no authors exist yet.
+  /// Ensures sample authors are present and enriched with bios.
   ///
-  /// This is used to populate the local database with initial data for
-  /// demonstration purposes when the app is started on a clean install.
+  /// If no authors exist, the sample authors are inserted.
+  /// If authors already exist, matching authors by name are updated with bios
+  /// if they do not have one yet.
   Future<void> _ensureSampleAuthorsIfEmpty(AuthorRepository repo) async {
     final existing = await repo.getAllAuthors();
-    if (existing.isNotEmpty) return;
 
-    for (final author in kSampleAuthors) {
-      await repo.addAuthor(author);
+    if (existing.isEmpty) {
+      // No authors at all: insert the full sample list.
+      for (final author in kSampleAuthors) {
+        await repo.addAuthor(author);
+      }
+      return;
+    }
+
+    // Authors exist (likely created via book seeding). Enrich bios where missing.
+    for (final sample in kSampleAuthors) {
+      final match = existing.firstWhere(
+            (a) => a.name.trim().toLowerCase() == sample.name.trim().toLowerCase(),
+        orElse: () => const Author(id: -1, name: '', bio: null),
+      );
+
+      if (match.id != -1 && (match.bio == null || match.bio!.trim().isEmpty)) {
+        final updated = Author(
+          id: match.id,
+          name: match.name,
+          bio: sample.bio,
+        );
+        await repo.updateAuthor(updated);
+      }
     }
   }
 }
