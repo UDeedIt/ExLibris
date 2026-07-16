@@ -67,7 +67,6 @@ lib/
 
 ### Layers
 
-```text
 - Data layer
   - Drift database (AppDatabase) with tables:
     - Books (with authorId, isbn, categories as JSON, readingStatus)
@@ -117,7 +116,6 @@ lib/
     - Navigation & splash:
       - HomeShellScreen (bottom navigation)
       - SplashScreen
-```
 
 ---
 
@@ -146,35 +144,25 @@ lib/
 
 ### Commands
 
-bash 
+bash
 
-# Fetch dependencies
+## Fetch dependencies
 ```bash 
 flutter pub get
-```
 
 # Generate Drift (and other) code
-```bash 
 dart run build_runner build --delete-conflicting-outputs
-```
 
 # Run on macOS
-```bash 
 flutter run -d macos
-```
 
 # Run on Android (device or emulator)
-```bash 
 flutter run -d <android-device-id>
-```
 
 # Run on iOS Simulator
-```bash 
 flutter run -d <ios-simulator-id>
-```
 
 # Run tests
-```bash 
 flutter test
 ```
 
