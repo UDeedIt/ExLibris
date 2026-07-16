@@ -144,10 +144,8 @@ lib/
 
 ### Commands
 
-bash
-
-## Fetch dependencies
 ```bash 
+# Fetch dependencies
 flutter pub get
 
 # Generate Drift (and other) code
