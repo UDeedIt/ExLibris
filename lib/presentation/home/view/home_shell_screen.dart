@@ -28,13 +28,18 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Localized labels for navigation.
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
+      // No AppBar here; each tab screen provides its own AppBar.
+      // The main content is provided by an IndexedStack so that
+      // each tab preserves its state while switching.
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
       ),
+      // Bottom navigation between Books, Authors and Categories.
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -46,17 +51,17 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
           NavigationDestination(
             icon: const Icon(Icons.menu_book_outlined),
             selectedIcon: const Icon(Icons.menu_book),
-            label: loc.navBooks, // 'Books'
+            label: loc.navBooks,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: loc.navAuthors//'Authors',
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: loc.navAuthors,
           ),
           NavigationDestination(
-            icon: Icon(Icons.category_outlined),
-            selectedIcon: Icon(Icons.category),
-            label: loc.navCategories // 'Categories',
+            icon: const Icon(Icons.category_outlined),
+            selectedIcon: const Icon(Icons.category),
+            label: loc.navCategories,
           ),
         ],
       ),

@@ -6,6 +6,8 @@ import 'package:ex_libris/presentation/books/viewmodel/book_list_view_model.dart
 import 'package:ex_libris/presentation/books/view/add_book_screen.dart';
 import 'package:ex_libris/presentation/books/view/edit_book_screen.dart';
 
+import '../../../data/remote/backup_service.dart';
+
 /// Screen that displays the list of books.
 ///
 /// Uses [bookListViewModelProvider] to load and observe state.
@@ -29,27 +31,37 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Read the current state from the ViewModel using ref.
     final state = ref.watch(bookListViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ex Libris'),
+        actions: [
+          // Backup button in the Books app bar.
+          IconButton(
+            icon: const Icon(Icons.cloud_upload_outlined),
+            tooltip: 'Backup to server',
+            onPressed: _onBackupPressed,
+          ),
+        ],
       ),
       body: _buildBody(context, ref, state),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // Navigate to the AddBookScreen and refresh after returning.
           await Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => const AddBookScreen(),
             ),
           );
-          // After returning from AddBookScreen, refresh the list.
           await ref.read(bookListViewModelProvider.notifier).loadBooks();
         },
         child: const Icon(Icons.add),
       ),
     );
   }
+
 
   /// Builds the main body of the screen.
   ///
@@ -267,6 +279,25 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
 
       default:
         return status;
+    }
+  }
+
+  /// Triggers a backup of the current library state via [BackupService].
+  ///
+  /// Shows a [SnackBar] indicating success or failure.
+  Future<void> _onBackupPressed() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final backupService = ref.read(backupServiceProvider);
+
+    try {
+      await backupService.backup();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Backup successful')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Backup failed')),
+      );
     }
   }
 

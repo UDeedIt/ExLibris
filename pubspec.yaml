@@ -34,6 +34,10 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
 
+  # Add network capability
+  http: ^1.2.2
+
+
 dev_dependencies:
   # Drift code generator
   drift_dev: ^2.19.0

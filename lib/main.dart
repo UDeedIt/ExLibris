@@ -26,6 +26,12 @@ class ExLibrisApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
+        appBarTheme: const AppBarTheme(
+          // Adjust this color to the shade of grey you prefer.
+          backgroundColor: Color(0xFFEEEEEE),
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,
